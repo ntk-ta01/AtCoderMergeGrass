@@ -33,6 +33,6 @@ export const useLoginState = () => {
   return useSWRData(USER_URL, (url) => typeCastFetcher<UserID>(url));
 };
 
-export const GetGraphData = () => {
-  return useSWRData(DATA_URL, (url) => typeCastFetcher<GraphData>(url));
+export const GetGraphData = (source: String) => {
+  return useSWRData(`${DATA_URL}/${source}`, (url) => typeCastFetcher<GraphData>(url));
 };

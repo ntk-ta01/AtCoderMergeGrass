@@ -6,20 +6,14 @@ import {
   getToday,
 } from "./utils/DateUtil";
 import moment from "moment";
-import { useLoginState, GetGraphData } from "./api/APIClient";
+import LoginForm from "./components/LoginForm";
+import { useState } from 'react';
 
 const WEEKDAY = 7;
 const WEEKS = 53;
 
 function App() {
-  const userdata = useLoginState().data;
-
-  const GITHUB_LOGIN_LINK = "https://github.com/login/oauth/authorize?client_id=459928d588c951b32207";
-
-  console.log("userdata:", userdata);
-  const isLoggedIn = !!userdata && userdata.user_id.length > 0 ? true : false;
-
-  let values = [];
+  const [values, setValues] = useState([]);
   const dates = [];
 
   const today = getToday();
@@ -27,27 +21,29 @@ function App() {
   const startDate = nextSunday.date(nextSunday.date() - WEEKS * WEEKDAY);
   for (let i = 0; i < WEEKS * WEEKDAY; i++) {
     const date = formatMomentDate(moment(startDate).add(i, "day"));
-    values.push(undefined);
-    dates.push(date);
-  }
-
-  let data = GetGraphData();
-  if (isLoggedIn && !!data.data) {
-    for (let i = 0; i < data.data.length; ++i) {
-      for (let j = 0; j < data.data[i]['contributionDays'].length; ++j) {
-        values[i * WEEKDAY + j] = data.data[i]['contributionDays'][j]['contributionCount'];
-      }
+    if (values.length < WEEKS * WEEKDAY) {
+      values.push(undefined);
+    }
+    if (dates.length < WEEKS * WEEKDAY) {
+      dates.push(date);
     }
   }
 
+  // Mergeボタンを押したらマージしたグラフを出力する
+  // AtCoder Problemsから取ってくる
+  // merge押すまではGitHubの分も更新しないのがよさそう？
+  // Merge前にGitHubでログイン済みか確認する
+
+  // 全てのログインに成功し、Mergeボタンを押したらGraphが更新されるってわけ。
+
+  // 更新ボタン押すとグラフが初期状態になる tataku-github-apiではこうならない
+  // まあでもMergeボタン押したらグラフが表示されればええか
+  // むしろ更新押したら人々は真っ白になってほしそう？
+  // 自分のGitHubと人のAtCoderProblemsの芝をマージすることが可能（意味ある？）逆は無理。人のGitHubが取得できないので。
   return (
     <div className="App">
-      <h1>Tataku GitHub API</h1>
-      {isLoggedIn ? (
-        <p>Welcome {userdata.user_id}!</p>
-      ) : (
-        <a href={GITHUB_LOGIN_LINK}>Login</a>
-      )}
+      <h1>AtCoder Merge Grass</h1>
+      <LoginForm values={values} setValues={setValues}/>
       <Graph dates={dates} values={values}/>
     </div>
   );

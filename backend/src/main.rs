@@ -74,20 +74,34 @@ async fn get_user(req: HttpRequest) -> impl Responder {
         .finish()
 }
 
-#[get("/data")]
-async fn get_data(req: HttpRequest) -> impl Responder {
+#[get("/data/github")]
+async fn get_data_github(req: HttpRequest) -> impl Responder {
     let cookie_string = utils::get_cookie_string_from_header(req);
     if let Some(s) = cookie_string {
         if let Some(token) = utils::get_cookie_value("token", s) {
             let api_res = api::get_graph_data(&token).await;
             let weeks = api::parse_graph_response(api_res).await;
             if let Ok(weeks) = weeks {
-                let res = HttpResponse::Ok()
+                let response = HttpResponse::Ok()
                     .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
                     .json(weeks);
-                return res;
+                return response;
             }
         }
+    }
+    HttpResponse::InternalServerError()
+        .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+        .finish()
+}
+
+#[get("/data/atcoderproblems")]
+async fn get_data_atcoderproblems(web::Query(info): web::Query<UserIDAtCoder>) -> impl Responder {
+    let values = api::get_atcoder_graph_data(&info.uid).await;
+    if let Ok(values) = values {
+        let response = HttpResponse::Ok()
+            .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
+            .json(values);
+        return response;
     }
     HttpResponse::InternalServerError()
         .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
@@ -105,6 +119,11 @@ struct AccessToken {
     token_type: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct UserIDAtCoder {
+    uid: String,
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     HttpServer::new(|| {
@@ -112,7 +131,8 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(cors)
             .service(hello)
-            .service(get_data)
+            .service(get_data_github)
+            .service(get_data_atcoderproblems)
             .service(get_user)
             .route("/api", web::get().to(hello_api))
             .route("/internal-api/authorize", web::get().to(get_token))

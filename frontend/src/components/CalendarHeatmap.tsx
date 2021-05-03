@@ -23,7 +23,7 @@ export default function CalendarHeatmap(props: Props): React.ReactElement {
     const height = yOffset + blockWidth * props.rows;
     return (
         <div style={{ width: "100%" }}>
-            <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "100%" }}>
+            <svg viewBox={`0 0 ${width} ${height}`} style={{ width: "90%" }}>
                 {DAY_NAMES_SHORT.map((day_name, i) => (
                     <text
                         key={day_name}

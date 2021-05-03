@@ -2,10 +2,13 @@ use actix_http::{encoding::Decoder, Payload};
 use actix_web::client::{Client, ClientResponse};
 use actix_web::http::header;
 use anyhow::{bail, Result};
-use chrono::{Datelike, Local, NaiveDateTime};
+use chrono::{Datelike, Local, NaiveDate, NaiveDateTime};
 use serde::Deserialize;
 use serde::Serialize;
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::{HashMap, HashSet},
+    time::Duration,
+};
 
 pub async fn get_graph_data(access_token: &str) -> ClientResponse<Decoder<Payload>> {
     let query = r#"{"query" : "query { viewer { contributionsCollection { contributionCalendar { weeks { firstDay contributionDays { contributionCount } } } } } }"}"#;
@@ -48,7 +51,7 @@ pub async fn get_user_id(access_token: &str) -> Result<String> {
     Ok(user_id.data.viewer.login)
 }
 
-pub async fn get_atcoder_graph_data(user_id: &str) -> Result<Vec<i32>> {
+pub async fn get_atcoder_graph_data(user_id: &str, show_mode: ShowMode) -> Result<Vec<usize>> {
     if user_id.is_empty() {
         bail!("no input");
     }
@@ -62,13 +65,78 @@ pub async fn get_atcoder_graph_data(user_id: &str) -> Result<Vec<i32>> {
         .await;
 
     let body = response.unwrap().body().limit(2048 * 2048 * 126).await;
+
+    // if show_mode == Submissions
     // let submissions = response.unwrap().json::<Vec<Submission>>().await; // 一生Paylaod(overflow) 直せん
     let submissions: Vec<Submission> = serde_json::from_slice(&body.unwrap().to_vec()).unwrap();
 
+    let (first_day, last_day, dates, date_to_idx) = create_dates_data().await;
+
+    let mut counts = vec![0; dates.len()];
+    const NINE_HOUR: i64 = 32400;
+
+    match show_mode {
+        ShowMode::Submissions => {
+            for sub in submissions {
+                let date = NaiveDateTime::from_timestamp(sub.epoch_second + NINE_HOUR, 0).date();
+                if date < first_day || last_day < date {
+                    continue;
+                }
+                let idx = date_to_idx[&date];
+                counts[idx] += 1;
+            }
+        }
+        ShowMode::AC => {
+            for sub in submissions {
+                let date = NaiveDateTime::from_timestamp(sub.epoch_second + NINE_HOUR, 0).date();
+                if date < first_day || last_day < date || sub.result != "AC" {
+                    continue;
+                }
+                let idx = date_to_idx[&date];
+                counts[idx] += 1;
+            }
+        }
+        ShowMode::UniqueAC => {
+            // n = 提出数
+            // AC済みのsubだけに絞る O(n)
+            // epoch_secondでソート O(nlogn)
+            // problem_idを覚えるHashSetを作る
+            // AC時間の早い提出からcountしていく
+            // countするときはcountするprobelm_idがまだHashSetにないことを確認
+            // countしたらHashSetにproblem_idをいれる
+            let mut submissions = submissions
+                .into_iter()
+                .filter(|sub| sub.result == "AC")
+                .collect::<Vec<Submission>>();
+            submissions.sort_by_key(|sub| sub.epoch_second);
+            let mut counted_problems = HashSet::new();
+            for sub in submissions {
+                if !counted_problems.contains(&sub.problem_id) {
+                    counted_problems.insert(sub.problem_id);
+                    let date =
+                        NaiveDateTime::from_timestamp(sub.epoch_second + NINE_HOUR, 0).date();
+                    if date < first_day {
+                        continue;
+                    }
+                    let idx = date_to_idx[&date];
+                    counts[idx] += 1;
+                }
+            }
+        }
+    }
+    Ok(counts)
+}
+
+async fn create_dates_data() -> (
+    NaiveDate,
+    NaiveDate,
+    Vec<NaiveDate>,
+    HashMap<NaiveDate, usize>,
+) {
     const WEEKS: i64 = 53;
     const WEEKDAY: i64 = 7;
 
-    let last_day = Local::today().naive_local(); // 気にする　タイムゾーン
+    let last_day = Local::today().naive_local();
     let mut next_sunday = last_day.succ();
     while next_sunday.weekday() != chrono::Weekday::Sun {
         next_sunday = next_sunday.succ();
@@ -87,17 +155,14 @@ pub async fn get_atcoder_graph_data(user_id: &str) -> Result<Vec<i32>> {
         day = day.succ();
     }
 
-    let mut counts = vec![0; dates.len()];
-    const NINE_HOUR: i64 = 32400;
-    for sub in submissions {
-        let date = NaiveDateTime::from_timestamp(sub.epoch_second + NINE_HOUR, 0).date();
-        if date < first_day || last_day < date {
-            continue;
-        }
-        let idx = date_to_idx[&date];
-        counts[idx] += 1;
-    }
-    Ok(counts)
+    (first_day, last_day, dates, date_to_idx)
+}
+#[allow(clippy::upper_case_acronyms)]
+#[derive(Deserialize, Debug)]
+pub enum ShowMode {
+    Submissions,
+    AC,
+    UniqueAC,
 }
 
 #[derive(Deserialize, Debug)]
@@ -109,7 +174,7 @@ pub struct AtCoderData {
 pub struct Submission {
     id: i64,
     pub epoch_second: i64,
-    problem_id: String,
+    pub problem_id: String,
     contest_id: String,
     user_id: String,
     language: String,

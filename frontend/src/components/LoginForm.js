@@ -47,6 +47,7 @@ export default function LoginForm(props) {
           <input type="text" onChange={(e) => {setInputUserName(e.target.value)}} />
         </p>
       </label>
+      <p>showMode:{showMode}</p>
       <p>
         <ButtonGroup>
           <Button

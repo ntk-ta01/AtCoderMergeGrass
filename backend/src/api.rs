@@ -97,9 +97,8 @@ pub async fn get_atcoder_graph_data(user_id: &str, show_mode: ShowMode) -> Resul
             }
         }
         ShowMode::UniqueAC => {
-            // n = 提出数
-            // AC済みのsubだけに絞る O(n)
-            // epoch_secondでソート O(nlogn)
+            // AC済みのsubだけに絞る
+            // epoch_secondでソート
             // problem_idを覚えるHashSetを作る
             // AC時間の早い提出からcountしていく
             // countするときはcountするprobelm_idがまだHashSetにないことを確認

@@ -9,9 +9,9 @@ const formatCountTooltip = (
     count: number
 ): string => {
     if (count === 1) {
-        return `${date} ${count} contribution`;
+        return `${date} ${count} grass`;
     } else {
-        return `${date} ${count} contributions`;
+        return `${date} ${count} grasses`;
     }
 };
 

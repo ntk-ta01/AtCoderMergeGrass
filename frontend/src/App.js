@@ -29,17 +29,6 @@ function App() {
     }
   }
 
-  // Mergeボタンを押したらマージしたグラフを出力する
-  // AtCoder Problemsから取ってくる
-  // merge押すまではGitHubの分も更新しないのがよさそう？
-  // Merge前にGitHubでログイン済みか確認する
-
-  // 全てのログインに成功し、Mergeボタンを押したらGraphが更新されるってわけ。
-
-  // 更新ボタン押すとグラフが初期状態になる tataku-github-apiではこうならない
-  // まあでもMergeボタン押したらグラフが表示されればええか
-  // むしろ更新押したら人々は真っ白になってほしそう？
-  // 自分のGitHubと人のAtCoderProblemsの芝をマージすることが可能（意味ある？）逆は無理。人のGitHubが取得できないので。
   return (
     <div className="App">
       <h1>AtCoder Merge Grass</h1>

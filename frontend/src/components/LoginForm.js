@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button, ButtonGroup } from "reactstrap";
 import { useLoginState, GetGraphData } from "../api/APIClient";
 
 export default function LoginForm(props) {
@@ -8,12 +9,10 @@ export default function LoginForm(props) {
   const [AtCoderUserName, setAtCoderUserName] = useState("");
 
   const [inputUserName, setInputUserName] = useState("");
+  const [showMode, setShowMode] = useState("Submissions");
 
-  // backendにget -> backendがAtCoder Problemsからget
-  // Merge処理
-  // ログイン済みか確認
   let data_g = GetGraphData("github");
-  let data_a = GetGraphData("atcoderproblems?uid=" + AtCoderUserName);
+  let data_a = GetGraphData("atcoderproblems?uid=" + AtCoderUserName + "&show_mode=" + showMode);
 
   const updateGraph = () => {
     if (isLoggedIn && !!data_g.data && !!data_a.data) {
@@ -31,6 +30,10 @@ export default function LoginForm(props) {
     }
   };
 
+  // create:filter
+  // filterボタンを作る
+  // data_a.dataが変わる
+
   return (
     <form onSubmit={(e) => {e.preventDefault(); setAtCoderUserName(inputUserName); updateGraph();}}>
       {isLoggedIn ? (
@@ -44,7 +47,26 @@ export default function LoginForm(props) {
           <input type="text" onChange={(e) => {setInputUserName(e.target.value)}} />
         </p>
       </label>
-      <input type="submit" value="Merge" />
+      <p>
+        <ButtonGroup>
+          <Button
+            onClick={() => setShowMode("Submissions")}
+          >
+            All Submissions
+          </Button>
+          <Button
+            onClick={() => setShowMode("AC")}
+          >
+            All AC
+          </Button>
+          <Button
+            onClick={() => setShowMode("UniqueAC")}
+          >
+            Unique AC
+          </Button>
+        </ButtonGroup>
+      </p>
+      <p><input type="submit" value="Merge" /></p>
     </form>
   );
 }

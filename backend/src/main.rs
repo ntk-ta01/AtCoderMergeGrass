@@ -95,8 +95,9 @@ async fn get_data_github(req: HttpRequest) -> impl Responder {
 }
 
 #[get("/data/atcoderproblems")]
-async fn get_data_atcoderproblems(web::Query(info): web::Query<UserIDAtCoder>) -> impl Responder {
-    let values = api::get_atcoder_graph_data(&info.uid).await;
+async fn get_data_atcoderproblems(web::Query(info): web::Query<QueryAtCoder>) -> impl Responder {
+    println!("{:?}", info.show_mode);
+    let values = api::get_atcoder_graph_data(&info.uid, info.show_mode).await;
     if let Ok(values) = values {
         let response = HttpResponse::Ok()
             .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
@@ -120,8 +121,9 @@ struct AccessToken {
 }
 
 #[derive(Debug, Deserialize)]
-struct UserIDAtCoder {
+struct QueryAtCoder {
     uid: String,
+    show_mode: api::ShowMode,
 }
 
 #[actix_web::main]

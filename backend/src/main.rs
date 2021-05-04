@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use actix_web::{
     client::{Client, Connector},
     cookie::{Cookie, SameSite},
@@ -39,6 +40,7 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
     let query = String::from_utf8(bytes.to_vec()).unwrap();
     let access_token = serde_qs::from_str::<AccessToken>(&query).unwrap();
     let cookie = Cookie::build("token", access_token.access_token)
+        .domain("localhost") // なくてもいい
         .path("/") // 必要
         .secure(utils::is_https())
         .http_only(true)
@@ -126,11 +128,13 @@ struct QueryAtCoder {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let port = env::var("PORT")
-        .unwrap_or_else(|_| "3000".to_string())
+        .unwrap_or_else(|_| "8080".to_string())
         .parse()
         .expect("PORT must be a number");
     HttpServer::new(|| {
+        let cors = Cors::default().allowed_origin("http://atcoder-merge-grass.herokuapp.com");
         App::new()
+            .wrap(cors)
             .service(hello)
             .service(get_data_github)
             .service(get_data_atcoderproblems)

@@ -12,6 +12,11 @@ use std::env;
 mod api;
 mod utils;
 
+#[get("/")]
+async fn welcome() -> String {
+    "Welcome!".to_string()
+}
+
 #[get("/hello")]
 async fn hello() -> String {
     "Hello!".to_string()
@@ -126,6 +131,7 @@ struct QueryAtCoder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let host = env::var("HOST").expect("Host not set");
     let port = env::var("PORT")
         .unwrap_or_else(|_| "8080".to_string())
         .parse()
@@ -134,6 +140,7 @@ async fn main() -> std::io::Result<()> {
         let cors = Cors::default().allowed_origin("http://atcoder-merge-grass.herokuapp.com");
         App::new()
             .wrap(cors)
+            .service(welcome)
             .service(hello)
             .service(get_data_github)
             .service(get_data_atcoderproblems)
@@ -141,7 +148,7 @@ async fn main() -> std::io::Result<()> {
             .route("/api", web::get().to(hello_api))
             .route("/internal-api/authorize", web::get().to(get_token))
     })
-    .bind(("0.0.0.0", port))?
+    .bind((host, port))?
     .run()
     .await
 }

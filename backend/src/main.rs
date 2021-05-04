@@ -46,9 +46,9 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
     let access_token = serde_qs::from_str::<AccessToken>(&query).unwrap();
     let cookie = Cookie::build("token", access_token.access_token)
         .path("/") // 必要
-        .secure(utils::is_https())
+        .secure(true)
         .http_only(true)
-        .same_site(SameSite::Strict)
+        .same_site(SameSite::Lax)
         .finish();
 
     // 参考：https://github.com/kenkoooo/AtCoderProblems/blob/bb115ccebdad20afb3079197540a1ec3b48f9322/atcoder-problems-backend/src/server/auth.rs

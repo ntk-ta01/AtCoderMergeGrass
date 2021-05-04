@@ -60,7 +60,7 @@ pub async fn get_atcoder_graph_data(user_id: &str, show_mode: ShowMode) -> Resul
     let response = client
         .get(format!("{}{}", ATCODER_API_URL, user_id))
         .header(header::ACCEPT_ENCODING, "gzip")
-        .timeout(Duration::from_secs(20))
+        .timeout(Duration::from_secs(60))
         .send()
         .await;
 

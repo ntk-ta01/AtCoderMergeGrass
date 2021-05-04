@@ -1,7 +1,7 @@
 import useSWR, { SWRConfiguration } from "swr";
 
-const DATA_URL = `http://localhost:8080/data`;
-const USER_URL = `http://localhost:8080/user`;
+const DATA_URL = `https://atcoder-merge-grass.herokuapp.com:${process.env.PORT}/data`;
+const USER_URL = `https://atcoder-merge-grass.herokuapp.com:${process.env.PORT}/user`;
 
 const typeCastFetcher = <T>(url: string) =>
   fetch(url, {mode: 'cors', credentials: 'include'})

@@ -1,4 +1,3 @@
-use actix_cors::Cors;
 use actix_web::{
     client::{Client, Connector},
     cookie::{Cookie, SameSite},
@@ -8,6 +7,7 @@ use actix_web::{
 };
 use openssl::ssl::{SslConnector, SslMethod};
 use serde_derive::Deserialize;
+use std::env;
 mod api;
 mod utils;
 
@@ -39,7 +39,6 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
     let query = String::from_utf8(bytes.to_vec()).unwrap();
     let access_token = serde_qs::from_str::<AccessToken>(&query).unwrap();
     let cookie = Cookie::build("token", access_token.access_token)
-        .domain("localhost") // なくてもいい
         .path("/") // 必要
         .secure(utils::is_https())
         .http_only(true)
@@ -47,7 +46,7 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
         .finish();
 
     // 参考：https://github.com/kenkoooo/AtCoderProblems/blob/bb115ccebdad20afb3079197540a1ec3b48f9322/atcoder-problems-backend/src/server/auth.rs
-    let redirect_url = "http://localhost:3000";
+    let redirect_url = "http://atcoder-merge-grass.herokuapp.com";
     HttpResponse::TemporaryRedirect()
         // .cookie(cookie)
         .header(header::SET_COOKIE, cookie.to_string())
@@ -126,10 +125,12 @@ struct QueryAtCoder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let port = env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .expect("PORT must be a number");
     HttpServer::new(|| {
-        let cors = Cors::default().allowed_origin("http://localhost:3000");
         App::new()
-            .wrap(cors)
             .service(hello)
             .service(get_data_github)
             .service(get_data_atcoderproblems)
@@ -137,7 +138,7 @@ async fn main() -> std::io::Result<()> {
             .route("/api", web::get().to(hello_api))
             .route("/internal-api/authorize", web::get().to(get_token))
     })
-    .bind("127.0.0.1:8080")?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }

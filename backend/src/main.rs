@@ -63,9 +63,12 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
 #[get("/user")]
 async fn get_user(req: HttpRequest) -> impl Responder {
     let cookie_string = utils::get_cookie_string_from_header(req);
+    println!("user depth1(cookie) {:?}", cookie_string);
     if let Some(s) = cookie_string {
         if let Some(token) = utils::get_cookie_value("token", s) {
+            println!("user depth2(token) {:?}", token);
             let user_id = api::get_user_id(&token).await;
+            println!("user depth3(user_id) {:?}", user_id);
             if let Ok(user_id) = user_id {
                 return HttpResponse::Ok()
                     .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")

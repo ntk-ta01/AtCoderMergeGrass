@@ -4,7 +4,7 @@ const DATA_URL = `https://atcoder-merge-grass-api.herokuapp.com/data`;
 const USER_URL = `https://atcoder-merge-grass-api.herokuapp.com/user`;
 
 const typeCastFetcher = <T>(url: string) =>
-  fetch(url, {mode: 'cors', credentials: 'include'})
+  fetch(url, {method: 'GET', mode: 'cors', credentials: 'include'})
     .then((response) => response.json())
     .then((response) => response as T);
 

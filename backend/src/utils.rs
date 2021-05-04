@@ -23,6 +23,7 @@ pub fn get_env(key: &str) -> String {
 /// # Return value
 /// * bool - Secure 属性を付与するか判定するための真偽値
 ///
+#[allow(dead_code)]
 pub fn is_https() -> bool {
     get_env("HTTPS") == "1"
 }

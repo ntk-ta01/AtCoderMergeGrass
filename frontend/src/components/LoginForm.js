@@ -4,7 +4,7 @@ import { useLoginState, GetGraphData } from "../api/APIClient";
 
 export default function LoginForm(props) {
   const userdata = useLoginState().data;
-  const GITHUB_LOGIN_LINK = "https://github.com/login/oauth/authorize?client_id=459928d588c951b32207";
+  const GITHUB_LOGIN_LINK = "https://github.com/login/oauth/authorize?client_id=f20f1d8d87eb961b3609";
   const isLoggedIn = !!userdata && userdata.user_id.length > 0 ? true : false;
   const [AtCoderUserName, setAtCoderUserName] = useState("");
 

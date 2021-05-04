@@ -32,6 +32,7 @@ function App() {
   return (
     <div className="App">
       <h1>AtCoder Merge Grass</h1>
+      <p>GitHubの芝とAtCoder Problemsの芝をマージします。</p>
       <LoginForm values={values} setValues={setValues}/>
       <Graph dates={dates} values={values}/>
     </div>

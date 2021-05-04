@@ -1,1 +1,1 @@
-web: ./target/release/backend
+web: ./backend/target/release/backend

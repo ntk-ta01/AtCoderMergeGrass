@@ -17,6 +17,16 @@ pub fn get_env(key: &str) -> String {
     String::new()
 }
 
+/// 環境変数に設定された HTTPS の値が 1 か判定する
+/// Cookie の属性に Secure を付与するか判定するのに使用する
+///
+/// # Return value
+/// * bool - Secure 属性を付与するか判定するための真偽値
+///
+pub fn is_https() -> bool {
+    get_env("HTTPS") == "1"
+}
+
 /// 存在していれば、特定のキーで Cookie に設定された値を取得するための関数
 ///
 /// # Arguments

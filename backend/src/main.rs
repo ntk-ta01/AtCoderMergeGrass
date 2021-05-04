@@ -9,6 +9,8 @@ use actix_web::{
 use openssl::ssl::{SslConnector, SslMethod};
 use serde_derive::Deserialize;
 use std::env;
+
+use crate::utils::is_https;
 mod api;
 mod utils;
 
@@ -46,7 +48,7 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
     let access_token = serde_qs::from_str::<AccessToken>(&query).unwrap();
     let cookie = Cookie::build("token", access_token.access_token)
         .path("/") // 必要
-        .secure(true)
+        .secure(is_https())
         .http_only(true)
         .same_site(SameSite::Lax)
         .finish();

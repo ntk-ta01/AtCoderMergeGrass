@@ -40,7 +40,6 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
     let query = String::from_utf8(bytes.to_vec()).unwrap();
     let access_token = serde_qs::from_str::<AccessToken>(&query).unwrap();
     let cookie = Cookie::build("token", access_token.access_token)
-        .domain("localhost") // なくてもいい
         .path("/") // 必要
         .secure(utils::is_https())
         .http_only(true)

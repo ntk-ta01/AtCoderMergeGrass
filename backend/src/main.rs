@@ -52,7 +52,7 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
         .finish();
 
     // 参考：https://github.com/kenkoooo/AtCoderProblems/blob/bb115ccebdad20afb3079197540a1ec3b48f9322/atcoder-problems-backend/src/server/auth.rs
-    let redirect_url = "http://atcoder-merge-grass.herokuapp.com";
+    let redirect_url = "https://atcoder-merge-grass.herokuapp.com";
     HttpResponse::TemporaryRedirect()
         // .cookie(cookie)
         .header(header::SET_COOKIE, cookie.to_string())
@@ -137,7 +137,7 @@ async fn main() -> std::io::Result<()> {
         .parse()
         .expect("PORT must be a number");
     HttpServer::new(|| {
-        let cors = Cors::default().allowed_origin("http://atcoder-merge-grass.herokuapp.com");
+        let cors = Cors::default().allowed_origin("https://atcoder-merge-grass.herokuapp.com");
         App::new()
             .wrap(cors)
             .service(welcome)

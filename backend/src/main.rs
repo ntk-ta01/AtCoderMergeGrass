@@ -65,6 +65,7 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
 
 #[get("/user")]
 async fn get_user(req: HttpRequest) -> impl Responder {
+    println!("{:?}", req);
     let cookie_string = utils::get_cookie_string_from_header(req);
     println!("user depth1(cookie) {:?}", cookie_string);
     if let Some(s) = cookie_string {

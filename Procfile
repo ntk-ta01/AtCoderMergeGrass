@@ -1,1 +1,0 @@
-web: ./backend/target/release/backend

@@ -57,6 +57,7 @@ async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
         // .cookie(cookie)
         .header(header::SET_COOKIE, cookie.to_string())
         .header(header::LOCATION, redirect_url)
+        .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
         .finish()
 }
 

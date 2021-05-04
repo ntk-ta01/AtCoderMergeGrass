@@ -30,10 +30,6 @@ export default function LoginForm(props) {
     }
   };
 
-  // create:filter
-  // filterボタンを作る
-  // data_a.dataが変わる
-
   return (
     <form onSubmit={(e) => {e.preventDefault(); setAtCoderUserName(inputUserName); updateGraph();}}>
       {isLoggedIn ? (

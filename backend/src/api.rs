@@ -64,11 +64,15 @@ pub async fn get_atcoder_graph_data(user_id: &str, show_mode: ShowMode) -> Resul
         .send()
         .await;
 
-    let body = response.unwrap().body().limit(2048 * 2048 * 126).await;
+    let body = match response {
+        Ok(mut response) => response.body().limit(2048 * 2048 * 126).await,
+        Err(_) => {
+            bail!("Probably an invalid username");
+        }
+    };
 
-    // if show_mode == Submissions
     // let submissions = response.unwrap().json::<Vec<Submission>>().await; // 一生Paylaod(overflow) 直せん
-    let submissions: Vec<Submission> = serde_json::from_slice(&body.unwrap().to_vec()).unwrap();
+    let submissions: Vec<Submission> = serde_json::from_slice(&body.unwrap().to_vec())?;
 
     let (first_day, last_day, dates, date_to_idx) = create_dates_data().await;
 

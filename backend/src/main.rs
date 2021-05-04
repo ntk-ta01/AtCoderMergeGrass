@@ -23,7 +23,7 @@ async fn hello_api() -> impl Responder {
 async fn get_token(web::Query(info): web::Query<Code>) -> HttpResponse {
     // 2. Users are redirected back to your site by GitHub
     let client_secret = &utils::get_env("CLIENT_SECRET");
-    let client_id = "459928d588c951b32207";
+    let client_id = &utils::get_env("CLIENT_ID");
     let builder = SslConnector::builder(SslMethod::tls()).unwrap();
     let client = Client::builder()
         .connector(Connector::new().ssl(builder.build()).finish())
@@ -61,7 +61,6 @@ async fn get_user(req: HttpRequest) -> impl Responder {
     if let Some(s) = cookie_string {
         if let Some(token) = utils::get_cookie_value("token", s) {
             let user_id = api::get_user_id(&token).await;
-            // user_id 渡す
             if let Ok(user_id) = user_id {
                 return HttpResponse::Ok()
                     .header(header::ACCESS_CONTROL_ALLOW_CREDENTIALS, "true")
@@ -96,7 +95,6 @@ async fn get_data_github(req: HttpRequest) -> impl Responder {
 
 #[get("/data/atcoderproblems")]
 async fn get_data_atcoderproblems(web::Query(info): web::Query<QueryAtCoder>) -> impl Responder {
-    println!("{:?}", info.show_mode);
     let values = api::get_atcoder_graph_data(&info.uid, info.show_mode).await;
     if let Ok(values) = values {
         let response = HttpResponse::Ok()
